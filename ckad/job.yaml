@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-job
+spec:
+  template:
+    spec:
+        containers:
+        - name: print
+          image: busybox:latest
+          command: ['echo', 'This is a test job!']
+        restartPolicy: Never
+  backoffLimit: 4
+  activeDeadlineSeconds: 10

@@ -1,0 +1,50 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: localdisk
+provisioner: kubernetes.io/no-provisioner
+allowVolumeExpansion: true
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  storageClassName: localdisk
+  persistentVolumeReclaimPolicy: Recycle
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /var/data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  storageClassName: localdisk
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pv-pod
+spec:
+  restartPolicy: Never
+  containers:
+  - name: busybox
+    image: busybox:latest
+    command: ['sh', '-c', 'echo Success! >> /output/success.txt']
+    volumeMounts:
+    - name: pv-storage
+      mountPath: /output
+  volumes:
+  - name: pv-storage
+    persistentVolumeClaim:
+      claimName: my-pvc
